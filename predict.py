@@ -91,6 +91,10 @@ def main():
         print("MAE: {:.2f}".format(mae))  # Mean Absolute Error
         print("R2: {:.2f}".format(r2))  # R-squared
 
+        rmse = cleanLargeNumber(rmse)
+        mae = cleanLargeNumber(mae)
+        r2 = cleanLargeNumber(r2)
+
         fig, ax = plt.subplots()
 
         # Plot the dataset and the linear regression
@@ -130,7 +134,7 @@ def main():
         plt.text(
             0.05,
             0.05,
-            f"RMSE: {cleanLargeNumber(rmse)}\nMAE: {cleanLargeNumber(mae)}\nR2: {cleanLargeNumber(r2)}",
+            f"RMSE: {rmse}\nMAE: {mae}\nR2: {r2}",
             transform=ax.transAxes
         )
 
