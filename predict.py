@@ -11,6 +11,19 @@ def normalize_mileage(mileage, mean, std):
     return (mileage - mean) / std
 
 
+def cleanLargeNumber(number):
+    if number > 1000000:
+        return "{:.0f}M".format(number / 1000000)
+    elif number > 1000:
+        return "{:.0f}K".format(number / 1000)
+    elif number < -1000000:
+        return "-{:.0f}M".format(-number / 1000000)
+    elif number < -1000:
+        return "-{:.0f}K".format(-number / 1000)
+    else:
+        return "{:.2f}".format(number)
+
+
 def main():
     try:
         mileage = float(input("Enter the mileage of the car: "))
@@ -34,7 +47,16 @@ def main():
                 theta0 = float(lines[0].split(':')[1])
                 theta1 = float(lines[1].split(':')[1])
 
-        normalized_mileage = normalize_mileage(mileage, 63060, 31665)
+        # Open data.csv and get mean and std
+        dataset = np.genfromtxt('data.csv', delimiter=',', skip_header=1)
+        mileages = dataset[:, 0]
+        prices = dataset[:, 1]
+
+        # Statistics
+        mean = np.mean(mileages)
+        std = np.std(mileages)
+
+        normalized_mileage = normalize_mileage(mileage, mean, std)
         estimated_price = estimate_price(normalized_mileage, theta0, theta1)
 
         # Print result
@@ -43,17 +65,40 @@ def main():
             .format(mileage, estimated_price)
         )
 
-        # Load dataset
-        dataset = np.genfromtxt('data.csv', delimiter=',', skip_header=1)
-        mileages = dataset[:, 0]
-        prices = dataset[:, 1]
+        # Return if no theta0 and theta1
+        if theta0 == 0 and theta1 == 0:
+            return
+
+        # Precise statistics
+        rmse = np.sqrt(
+            np.mean(
+                (estimate_price(mileages, theta0, theta1) - prices) ** 2
+            )
+        )
+        mae = np.mean(
+            np.abs(
+                estimate_price(mileages, theta0, theta1) - prices
+            )
+        )
+        r2 = 1 - (
+            np.sum(
+                (prices - estimate_price(mileages, theta0, theta1)) ** 2
+            ) / np.sum((prices - np.mean(prices)) ** 2)
+        )
+
+        # Print statistics
+        print("RMSE: {:.2f}".format(rmse))  # Root Mean Squared Error
+        print("MAE: {:.2f}".format(mae))  # Mean Absolute Error
+        print("R2: {:.2f}".format(r2))  # R-squared
+
+        fig, ax = plt.subplots()
 
         # Plot the dataset and the linear regression
         plt.scatter(mileages, prices, label='Datas', color='blue', zorder=2)
         plt.plot(
             mileages,
             estimate_price(
-                normalize_mileage(mileages, 63060, 31665),
+                normalize_mileage(mileages, mean, std),
                 theta0,
                 theta1
             ),
@@ -74,9 +119,24 @@ def main():
 
         plt.xlabel('Mileage')
         plt.ylabel('Price')
-        plt.title('Linear Regression')
+
+        # Title with mileage and estimated price
+        plt.title(
+            "Estimated price of {:.0f} km: {:.2f} €"
+            .format(mileage, estimated_price)
+        )
+
+        # Add statistics to the plot (bottom left)
+        plt.text(
+            0.05,
+            0.05,
+            f"RMSE: {cleanLargeNumber(rmse)}\nMAE: {cleanLargeNumber(mae)}\nR2: {cleanLargeNumber(r2)}",
+            transform=ax.transAxes
+        )
+
         plt.legend()
         plt.show()
+
     except Exception as e:
         print("An error occurred: ", e)
 
