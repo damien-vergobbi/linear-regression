@@ -61,7 +61,7 @@ def main():
 
         # Print result
         print(
-            "Estimated price for a car with a mileage of {:.0f} km: {:.2f} €"
+            "Estimated price for a car with a mileage of {:.0f} km: {:.2f} $"
             .format(mileage, estimated_price)
         )
 
@@ -126,7 +126,7 @@ def main():
 
         # Title with mileage and estimated price
         plt.title(
-            "Estimated price of {:.0f} km: {:.2f} €"
+            "Estimated price of {:.0f} km: {:.2f} $"
             .format(mileage, estimated_price)
         )
 
