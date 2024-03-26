@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+import matplotlib.pyplot as plt
 from predict import estimate_price
 
 
@@ -23,6 +24,20 @@ def train_model(dataset, learning_rate, num_iterations):
 
     m = len(dataset)
 
+    # Create plt to show evolution of theta0 and theta1 during training
+    fig, ax = plt.subplots()
+    ax.set_title('Evolution of theta0 and theta1 during training')
+    ax.set_xlabel('Iterations')
+    ax.set_ylabel('Theta')
+    ax.grid(True)
+
+    # Show the initial values of theta0 and theta1
+    ax.plot(0, theta0, 'o', color='blue', label='Theta0')
+    ax.plot(0, theta1, 'o', color='red', label='Theta1')
+    ax.legend()
+
+    ax.set_xlim(0, num_iterations)
+
     # Perform gradient descent
     for _ in range(num_iterations):
         tmp_theta0 = 0
@@ -38,6 +53,17 @@ def train_model(dataset, learning_rate, num_iterations):
         # Update theta0 and theta1
         theta0 -= (learning_rate * (1 / m) * tmp_theta0)
         theta1 -= (learning_rate * (1 / m) * tmp_theta1)
+
+        # Plot the evolution of theta0 and theta1
+        ax.plot(_, theta0, 'o', color='blue')
+        ax.plot(_, theta1, 'o', color='red')
+
+        plt.draw()
+
+        if _ % 15 == 0:
+            plt.pause(0.1)
+
+    plt.show()
 
     return theta0, theta1
 
@@ -57,7 +83,7 @@ def main():
     # overshooting the minimum. Less learning rate = slower convergence,
     # but more accurate
     learning_rate = 0.1
-    num_iterations = 1000
+    num_iterations = 150
 
     # Train the model
     theta0, theta1 = train_model(
