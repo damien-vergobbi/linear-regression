@@ -25,21 +25,36 @@ def train_model(dataset, learning_rate, num_iterations):
     m = len(dataset)
 
     # Create plt to show evolution of theta0 and theta1 during training
-    fig, ax = plt.subplots()
-    ax.set_title('Evolution of theta0 and theta1 during training')
-    ax.set_xlabel('Iterations')
-    ax.set_ylabel('Theta')
-    ax.grid(True)
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    thetas = axs[0]
+    affine = axs[1]
+
+    # First plot with the initial values of theta0 and theta1
+    thetas.set_title('Evolution of theta0 and theta1 during training')
+    thetas.set_xlabel('Iterations')
+    thetas.set_ylabel('Theta')
+    thetas.grid(True)
 
     # Show the initial values of theta0 and theta1
-    ax.plot(0, theta0, 'o', color='blue', label='Theta0')
-    ax.plot(0, theta1, 'o', color='red', label='Theta1')
-    ax.legend()
+    thetas.plot(0, theta0, 'o', color='blue', label='Theta0')
+    thetas.plot(0, theta1, 'o', color='red', label='Theta1')
+    thetas.legend()
 
-    ax.set_xlim(0, num_iterations)
+    thetas.set_xlim(0, num_iterations)
+
+    # Second plot with the affine function
+    affine.set_title('Affine function')
+    affine.set_xlabel('Mileage')
+    affine.set_ylabel('Price')
+    affine.grid(True)
+
+    # Plot the dataset
+    x_values = np.array(dataset)[:, 0]
+    y_values = np.array(dataset)[:, 1]
+    affine.plot(x_values, y_values, 'o', color='blue')
 
     # Perform gradient descent
-    for _ in range(num_iterations):
+    for i in range(num_iterations):
         tmp_theta0 = 0
         tmp_theta1 = 0
         for mileage, price in dataset:
@@ -55,13 +70,22 @@ def train_model(dataset, learning_rate, num_iterations):
         theta1 -= (learning_rate * (1 / m) * tmp_theta1)
 
         # Plot the evolution of theta0 and theta1
-        ax.plot(_, theta0, 'o', color='blue')
-        ax.plot(_, theta1, 'o', color='red')
+        thetas.plot(i, theta0, 'o', color='blue')
+        thetas.plot(i, theta1, 'o', color='red')
+
+        # Plot the affine function
+        x_values = np.linspace(-2, 3, 100)
+        y_values = estimate_price(x_values, theta0, theta1)
+        affine.plot(
+            x_values,
+            y_values,
+            color=(1, 0, 0) if i == num_iterations - 1 else (0, 1, 0, 0.6)
+        )
 
         plt.draw()
 
-        if _ % 15 == 0:
-            plt.pause(0.1)
+        if i % 50 == 0:
+            plt.pause(0.0003)
 
     plt.show()
 
@@ -83,7 +107,7 @@ def main():
     # overshooting the minimum. Less learning rate = slower convergence,
     # but more accurate
     learning_rate = 0.1
-    num_iterations = 150
+    num_iterations = 1000
 
     # Train the model
     theta0, theta1 = train_model(
